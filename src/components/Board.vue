@@ -8,7 +8,7 @@ const board = computed(() => boardStore.getBoard);
 </script>
 
 <template>
-  <div class="flex gap-4 h-full">
+  <div class="flex flex-col md:flex-row gap-4 h-full">
     <Column
       v-if="board && board.columns"
       v-for="column in board.columns"

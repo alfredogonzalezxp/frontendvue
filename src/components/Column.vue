@@ -1,6 +1,7 @@
 <script setup>
 import TaskCard from './TaskCard.vue';
 import { useUserStore } from '@/stores/userStore';
+import { VueDraggableNext } from 'vue-draggable-next';
 
 const userStore = useUserStore();
 
@@ -11,7 +12,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['addTask', 'editTask']);
+const emit = defineEmits(['addTask', 'editTask', 'update:column']);
 
 function handleEditTask(task) {
   emit('editTask', { task, columnId: props.column.id });
@@ -19,11 +20,18 @@ function handleEditTask(task) {
 </script>
 
 <template>
-  <div class="w-80 bg-gray-200 dark:bg-gray-700 rounded-lg p-3 flex flex-col">
+  <div class="w-full md:w-80 bg-gray-200 dark:bg-gray-700 rounded-lg p-3 flex flex-col">
     <h2 class="font-bold mb-3">{{ column.name }}</h2>
-    <div class="flex-grow space-y-3 overflow-y-auto">
+    <VueDraggableNext
+      class="flex-grow space-y-3 overflow-y-auto"
+      :list="column.tasks"
+      group="tasks"
+      item-key="id"
+      @change="$emit('update:column', { ...column, tasks: $event.moved ? column.tasks : $event.added ? column.tasks : $event.removed ? column.tasks : [] })"
+    >
       <TaskCard v-for="task in column.tasks" :key="task.id" :task="task" @click="handleEditTask(task)" />
-    </div>
+    </VueDraggableNext>
+
     <button
       v-if="userStore.isAdmin"
       @click="$emit('addTask', { columnId: column.id })"
@@ -32,4 +40,4 @@ function handleEditTask(task) {
       + Add Task
     </button>
   </div>
-</template>
+</template>pm

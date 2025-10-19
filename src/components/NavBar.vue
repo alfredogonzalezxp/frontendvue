@@ -18,7 +18,7 @@ function handleLogout() {
 
     <template v-if="userStore.isAuthenticated">
       <!-- User Info -->
-      <div class="mr-4">
+      <div class="mr-4 hidden sm:block">
         Welcome, <span class="font-semibold">{{ userStore.currentUser.name }}</span> ({{ userStore.currentUser.role }})
       </div>
 
