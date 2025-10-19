@@ -19,6 +19,10 @@ export const useBoardStore = defineStore('board', {
               priority: 'medium',
               assignedTo: 2, // Assign to 'Worker Bee'
               labels: [{ text: 'Setup', color: '#4A90E2' }],
+              comments: [
+                { id: 'comment-1', userId: 1, text: 'Initial setup complete.', timestamp: '2024-06-14T10:00:00Z' }
+              ],
+              attachments: [],
             },
             {
               id: 'task-2',
@@ -27,7 +31,10 @@ export const useBoardStore = defineStore('board', {
               dueDate: '2024-06-18',
               progress: 80,
               assignedTo: 2, // Assign to 'Worker Bee'
-              priority: 'low', labels: [{ text: 'Frontend', color: '#50E3C2' }],
+              priority: 'low', 
+              labels: [{ text: 'Frontend', color: '#50E3C2' }],
+              comments: [],
+              attachments: [],
             },
           ],
         },
@@ -82,7 +89,7 @@ export const useBoardStore = defineStore('board', {
         setTimeout(() => {
           const column = this.board.columns.find((c) => c.id === columnId);
           if (column) {
-            const newTask = { id: `task-${Date.now()}`, progress: 0, labels: [], assignedTo: null, ...taskData };
+            const newTask = { id: `task-${Date.now()}`, progress: 0, labels: [], assignedTo: null, comments: [], attachments: [], ...taskData };
             resolve(newTask);
           }
         }, 300); // Simulate network delay

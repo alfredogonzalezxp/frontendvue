@@ -13,12 +13,10 @@ const props = defineProps({
 
 const emit = defineEmits(['click']);
 
-function onClick() {
-  if (userStore.isAdmin) {
-    emit('click', props.task);
-  }
-}
-
+const assignee = computed(() => {
+  return props.task.assignedTo ? userStore.users.find(u => u.id === props.task.assignedTo) : null;
+});
+ 
 const priorityColorClass = computed(() => {
   switch (props.task.priority) {
     case 'high':
@@ -40,26 +38,11 @@ const priorityText = computed(() => {
   return props.task.priority.charAt(0).toUpperCase() + props.task.priority.slice(1);
 });
 </script>
-<script>
-import { useUserStore } from '@/stores/userStore';
-
-export default {
-  computed: {
-    assignee() {
-      const userStore = useUserStore();
-      return this.task.assignedTo ? userStore.users.find(u => u.id === this.task.assignedTo) : null;
-    }
-  }
-}
-</script>
 
 <template>
   <div
     class="bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm flex flex-col gap-2"
-    :class="{
-      'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50': userStore.isAdmin,
-    }"
-    @click="onClick"
+    :class="'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50'"
   >
     <!-- Priority Indicator -->
     <div class="flex items-center gap-2 mb-1">
@@ -92,6 +75,22 @@ export default {
       <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
         {{ assignee.name }}
       </span>
+    </div>
+
+    <!-- Comments and Attachments Indicators -->
+    <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
+      <div v-if="task.attachments && task.attachments.length" class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+        </svg>
+        <span>{{ task.attachments.length }}</span>
+      </div>
+      <div v-if="task.comments && task.comments.length" class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <span>{{ task.comments.length }}</span>
+      </div>
     </div>
 
     <!-- Progress Bar -->

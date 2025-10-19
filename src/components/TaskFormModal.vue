@@ -18,7 +18,7 @@ const form = ref({
   title: '',
   description: '',
   dueDate: '',
-  priority: 'medium', // Default priority
+  priority: 'medium',
   labels: [],
   assignedTo: null,
 });

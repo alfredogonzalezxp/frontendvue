@@ -12,16 +12,20 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['addTask', 'editTask', 'update:column']);
+const emit = defineEmits(['addTask', 'editTask', 'selectTask', 'update:column']);
 
 function handleEditTask(task) {
   emit('editTask', { task, columnId: props.column.id });
+}
+
+function handleSelectTask(task) {
+  emit('selectTask', { task, columnId: props.column.id });
 }
 </script>
 
 <template>
   <div class="w-full md:w-80 bg-gray-200 dark:bg-gray-700 rounded-lg p-3 flex flex-col">
-    <h2 class="font-bold mb-3">{{ column.name }}</h2>
+    <h2 class="font-bold mb-3 flex-shrink-0">{{ column.name }}</h2>
     <VueDraggableNext
       class="flex-grow space-y-3 overflow-y-auto"
       :list="column.tasks"
@@ -29,7 +33,7 @@ function handleEditTask(task) {
       item-key="id"
       @change="$emit('update:column', { ...column, tasks: $event.moved ? column.tasks : $event.added ? column.tasks : $event.removed ? column.tasks : [] })"
     >
-      <TaskCard v-for="task in column.tasks" :key="task.id" :task="task" @click="handleEditTask(task)" />
+      <TaskCard v-for="task in column.tasks" :key="task.id" :task="task" @click="handleSelectTask(task)" @dblclick.prevent="userStore.isAdmin && handleEditTask(task)" />
     </VueDraggableNext>
 
     <button

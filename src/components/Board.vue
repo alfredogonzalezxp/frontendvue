@@ -13,7 +13,7 @@ const board = computed(() => boardStore.getBoard);
       v-if="board && board.columns"
       v-for="column in board.columns"
       :key="column.id"
-      :column="column" @add-task="$emit('addTask', $event)" @edit-task="$emit('editTask', $event)"
+      :column="column" @add-task="$emit('addTask', $event)" @edit-task="$emit('editTask', $event)" @select-task="$emit('selectTask', $event)"
     />
   </div>
 </template>

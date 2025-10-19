@@ -1,46 +1,82 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import Board from '@/components/Board.vue';
 import TaskFormModal from '@/components/TaskFormModal.vue';
-import { ref } from 'vue';
+import TaskDetailsSidebar from '@/components/TaskDetailsSidebar.vue';
 import { useBoardStore } from '@/stores/boardStore';
+import { useUserStore } from '@/stores/userStore';
 
 const boardStore = useBoardStore();
-const showTaskModal = ref(false);
-const taskColumnId = ref(null);
-const editingTask = ref(null);
+const userStore = useUserStore();
 
-function handleAddTask({ columnId }) {
-  taskColumnId.value = columnId;
-  editingTask.value = null; // Ensure we're in "create" mode
-  showTaskModal.value = true;
+const showModal = ref(false);
+const selectedTask = ref(null);
+const editingTask = ref(null);
+const editingColumnId = ref(null);
+
+onMounted(async () => {
+  await userStore.fetchUsers();
+  await boardStore.fetchBoard();
+});
+
+function handleSelectTask({ task, columnId }) {
+  selectedTask.value = task;
+  editingColumnId.value = columnId;
 }
 
 function handleEditTask({ task, columnId }) {
-  taskColumnId.value = columnId;
   editingTask.value = task;
-  showTaskModal.value = true;
+  editingColumnId.value = columnId;
+  showModal.value = true;
+}
+
+function handleAddTask({ columnId }) {
+  handleEditTask({ task: null, columnId });
+}
+
+function closeModal() {
+  showModal.value = false;
+  editingTask.value = null;
+  // editingColumnId is not reset, so it's available for handleSaveTask
 }
 
 async function handleSaveTask(taskData) {
-  if (taskData.id) {
-    // It's an existing task, so we edit it.
-    await boardStore.editTask(taskColumnId.value, taskData);
+  const column = boardStore.board.columns.find(c => c.id === editingColumnId.value);
+  if (!column) return;
+
+  if (taskData.id) { // Editing existing task
+    await boardStore.editTask(editingColumnId.value, taskData);
+    if (selectedTask.value && selectedTask.value.id === taskData.id) {
+      const taskIndex = column.tasks.findIndex(t => t.id === taskData.id);
+      if (taskIndex !== -1) {
+        selectedTask.value = { ...column.tasks[taskIndex] };
+      }
+    }
   } else {
-    // It's a new task, so we add it.
-    await boardStore.addTask(taskColumnId.value, taskData);
+    const newTask = await boardStore.addTask(editingColumnId.value, taskData);
+    if (column) {
+      column.tasks.push(newTask);
+    }
   }
-  // The modal is closed by the event emitter in the modal itself
+  closeModal();
 }
 </script>
 
 <template>
-  <div class="p-4 h-full">
-    <Board @add-task="handleAddTask" @edit-task="handleEditTask" />
+  <div class="flex flex-1 overflow-hidden h-full">
+    <div class="flex-1 p-4 overflow-x-auto h-full">
+      <Board @add-task="handleAddTask" @edit-task="handleEditTask" @select-task="handleSelectTask" />
+    </div>
     <TaskFormModal
-      :show="showTaskModal"
+      :show="showModal"
       :task="editingTask"
-      @close="showTaskModal = false"
+      @close="closeModal"
       @save="handleSaveTask"
+    />
+    <TaskDetailsSidebar
+      :task="selectedTask"
+      @close="selectedTask = null"
+      @update-task="handleSaveTask"
     />
   </div>
 </template>
