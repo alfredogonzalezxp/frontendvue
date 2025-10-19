@@ -17,6 +17,8 @@ export const useBoardStore = defineStore('board', {
               dueDate: '2024-06-15',
               progress: 100, // percentage
               priority: 'medium',
+              assignedTo: 2, // Assign to 'Worker Bee'
+              labels: [{ text: 'Setup', color: '#4A90E2' }],
             },
             {
               id: 'task-2',
@@ -24,7 +26,8 @@ export const useBoardStore = defineStore('board', {
               description: 'Build the basic Vue components like Board, Column, and TaskCard.',
               dueDate: '2024-06-18',
               progress: 80,
-              priority: 'low',
+              assignedTo: 2, // Assign to 'Worker Bee'
+              priority: 'low', labels: [{ text: 'Frontend', color: '#50E3C2' }],
             },
           ],
         },
@@ -39,6 +42,11 @@ export const useBoardStore = defineStore('board', {
               dueDate: '2024-06-25',
               progress: 40,
               priority: 'high',
+              assignedTo: 1, // Assign to 'Admin User'
+              labels: [
+                { text: 'Design', color: '#9013FE' },
+                { text: 'Urgent', color: '#D0021B' },
+              ],
             },
           ],
         },
@@ -74,8 +82,7 @@ export const useBoardStore = defineStore('board', {
         setTimeout(() => {
           const column = this.board.columns.find((c) => c.id === columnId);
           if (column) {
-            const newTask = { id: `task-${Date.now()}`, progress: 0, ...taskData };
-            column.tasks.push(newTask);
+            const newTask = { id: `task-${Date.now()}`, progress: 0, labels: [], assignedTo: null, ...taskData };
             resolve(newTask);
           }
         }, 300); // Simulate network delay

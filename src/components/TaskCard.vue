@@ -40,6 +40,18 @@ const priorityText = computed(() => {
   return props.task.priority.charAt(0).toUpperCase() + props.task.priority.slice(1);
 });
 </script>
+<script>
+import { useUserStore } from '@/stores/userStore';
+
+export default {
+  computed: {
+    assignee() {
+      const userStore = useUserStore();
+      return this.task.assignedTo ? userStore.users.find(u => u.id === this.task.assignedTo) : null;
+    }
+  }
+}
+</script>
 
 <template>
   <div
@@ -55,12 +67,32 @@ const priorityText = computed(() => {
       <span class="text-xs font-medium">{{ priorityText }}</span>
     </div>
 
+    <!-- Labels -->
+    <div v-if="task.labels && task.labels.length" class="flex flex-wrap gap-1">
+      <span
+        v-for="label in task.labels"
+        :key="label.text"
+        class="px-2 py-0.5 text-xs font-semibold rounded-full"
+        :style="{ backgroundColor: label.color, color: '#ffffff' }"
+      >{{ label.text }}</span>
+    </div>
+
     <p class="font-semibold">{{ task.title }}</p>
 
     <!-- Description (optional) -->
     <p v-if="task.description" class="text-sm text-gray-600 dark:text-gray-400">
       {{ task.description }}
     </p>
+
+    <!-- Assignee -->
+    <div v-if="assignee" class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+      </svg>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ assignee.name }}
+      </span>
+    </div>
 
     <!-- Progress Bar -->
     <div v-if="task.progress != null" class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
