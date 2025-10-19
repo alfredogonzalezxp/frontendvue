@@ -43,6 +43,7 @@ const priorityText = computed(() => {
   <div
     class="bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm flex flex-col gap-2"
     :class="'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+    @click="emit('click', task)"
   >
     <!-- Priority Indicator -->
     <div class="flex items-center gap-2 mb-1">

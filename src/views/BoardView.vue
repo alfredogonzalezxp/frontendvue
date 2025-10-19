@@ -63,20 +63,41 @@ async function handleSaveTask(taskData) {
 </script>
 
 <template>
-  <div class="flex flex-1 overflow-hidden h-full">
+  <div class="flex flex-1 overflow-hidden h-full relative">
     <div class="flex-1 p-4 overflow-x-auto h-full">
       <Board @add-task="handleAddTask" @edit-task="handleEditTask" @select-task="handleSelectTask" />
     </div>
+
+    <!-- Sidebar Backdrop (for mobile/tablet) -->
+    <div v-if="selectedTask" @click="selectedTask = null" class="lg:hidden fixed inset-0 bg-black/30 z-30"></div>
+
     <TaskFormModal
       :show="showModal"
       :task="editingTask"
       @close="closeModal"
       @save="handleSaveTask"
     />
-    <TaskDetailsSidebar
-      :task="selectedTask"
-      @close="selectedTask = null"
-      @update-task="handleSaveTask"
-    />
+
+    <Transition name="slide-fade">
+      <TaskDetailsSidebar
+        v-if="selectedTask"
+        :task="selectedTask"
+        @close="selectedTask = null"
+        @update-task="handleSaveTask"
+      />
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+</style>
