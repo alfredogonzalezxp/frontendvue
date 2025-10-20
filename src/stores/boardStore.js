@@ -97,24 +97,69 @@ export const useBoardStore = defineStore('board', {
     },
 
     /**
-     * Simulates editing a task.
-     * @param {string} columnId
+     * Simulates updating a task. This can be used for any change.
      * @param {object} taskData
      */
-    async editTask(columnId, taskData) {
+    async updateTask(taskData) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          const column = this.board.columns.find((c) => c.id === columnId);
-          if (column) {
+          for (const column of this.board.columns) {
             const taskIndex = column.tasks.findIndex((t) => t.id === taskData.id);
             if (taskIndex !== -1) {
-              // Use Object.assign to update the properties of the existing task object
               Object.assign(column.tasks[taskIndex], taskData);
               resolve(column.tasks[taskIndex]);
+              return;
+            }
+          }
+        }, 300);
+      });
+    },
+
+    /**
+     * Simulates editing a task.
+     * @param {object} taskData
+     */
+    async editTask(taskData) {
+      return this.updateTask(taskData);
+    },
+
+    /**
+     * Simulates adding a comment to a task.
+     * @param {string} taskId
+     * @param {object} commentData
+     */
+    async addComment(taskId, commentData) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          for (const column of this.board.columns) {
+            const task = column.tasks.find((t) => t.id === taskId);
+            if (task) {
+              if (!task.comments) task.comments = [];
+              task.comments.unshift(commentData);
+              resolve(task);
+              return;
             }
           }
         }, 300); // Simulate network delay
       });
+    },
+
+    /**
+     * Simulates adding an attachment to a task.
+     * @param {string} taskId
+     * @param {object} attachmentData
+     */
+    async addAttachment(taskId, attachmentData) {
+      // This is a synchronous example for simplicity.
+      // In a real app, this would be an async API call.
+      for (const column of this.board.columns) {
+        const task = column.tasks.find((t) => t.id === taskId);
+        if (task) {
+          if (!task.attachments) task.attachments = [];
+          task.attachments.push(attachmentData);
+          return Promise.resolve(task);
+        }
+      }
     },
   },
 });

@@ -45,12 +45,12 @@ async function handleSaveTask(taskData) {
   if (!column) return;
 
   if (taskData.id) { // Editing existing task
-    await boardStore.editTask(editingColumnId.value, taskData);
+    await boardStore.updateTask(taskData);
     if (selectedTask.value && selectedTask.value.id === taskData.id) {
-      const taskIndex = column.tasks.findIndex(t => t.id === taskData.id);
-      if (taskIndex !== -1) {
-        selectedTask.value = { ...column.tasks[taskIndex] };
-      }
+      // The selectedTask is reactive, so it will update automatically.
+      // To be safe and ensure reactivity, we can re-assign it.
+      const updatedTask = column.tasks.find(t => t.id === taskData.id);
+      if (updatedTask) selectedTask.value = updatedTask;
     }
   } else {
     const newTask = await boardStore.addTask(editingColumnId.value, taskData);
@@ -83,7 +83,6 @@ async function handleSaveTask(taskData) {
         v-if="selectedTask"
         :task="selectedTask"
         @close="selectedTask = null"
-        @update-task="handleSaveTask"
       />
     </Transition>
   </div>

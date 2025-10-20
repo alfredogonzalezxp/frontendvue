@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useUserStore } from '@/stores/userStore';
+import { useBoardStore } from '@/stores/boardStore';
 
 const props = defineProps({
   task: {
@@ -9,45 +10,34 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close', 'update-task']);
+const emit = defineEmits(['close']);
 
 const userStore = useUserStore();
+const boardStore = useBoardStore();
 const newCommentText = ref('');
 
 const getCommentUser = (userId) => {
   return userStore.users.find(u => u.id === userId) || { name: 'Unknown User' };
 };
 
-function addComment() {
+async function addComment() {
   if (!props.task || !newCommentText.value.trim()) return;
 
-  const updatedTask = JSON.parse(JSON.stringify(props.task));
-  if (!updatedTask.comments) {
-    updatedTask.comments = [];
-  }
-
-  updatedTask.comments.unshift({
+  await boardStore.addComment(props.task.id, {
     id: `comment-${Date.now()}`,
     userId: userStore.currentUser.id,
     text: newCommentText.value.trim(),
     timestamp: new Date().toISOString(),
   });
-
   newCommentText.value = '';
-  emit('update-task', updatedTask);
 }
 
-function addAttachment() {
+async function addAttachment() {
   if (!props.task) return;
 
   const fileName = prompt("Enter attachment name:", "document.pdf");
   if (fileName) {
-    const updatedTask = JSON.parse(JSON.stringify(props.task));
-    if (!updatedTask.attachments) {
-      updatedTask.attachments = [];
-    }
-    updatedTask.attachments.push({ id: `att-${Date.now()}`, name: fileName, url: '#' });
-    emit('update-task', updatedTask);
+    await boardStore.addAttachment(props.task.id, { id: `att-${Date.now()}`, name: fileName, url: '#' });
   }
 }
 </script>
