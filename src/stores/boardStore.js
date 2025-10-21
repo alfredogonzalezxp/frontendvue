@@ -161,5 +161,40 @@ export const useBoardStore = defineStore('board', {
         }
       }
     },
+
+    /**
+     * Simulates removing an attachment from a task.
+     * @param {string} taskId
+     * @param {string} attachmentId
+     */
+    async removeAttachment(taskId, attachmentId) {
+      for (const column of this.board.columns) {
+        const task = column.tasks.find((t) => t.id === taskId);
+        if (task && task.attachments) {
+          const attachmentIndex = task.attachments.findIndex(a => a.id === attachmentId);
+          if (attachmentIndex !== -1) task.attachments.splice(attachmentIndex, 1);
+          return Promise.resolve(task);
+        }
+      }
+    },
+
+    /**
+     * Simulates deleting a task.
+     * @param {string} taskId
+     */
+    async deleteTask(taskId) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          for (const column of this.board.columns) {
+            const taskIndex = column.tasks.findIndex((t) => t.id === taskId);
+            if (taskIndex !== -1) {
+              column.tasks.splice(taskIndex, 1);
+              resolve(true);
+              return;
+            }
+          }
+        }, 300);
+      });
+    },
   },
 });

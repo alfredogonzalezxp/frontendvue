@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { useBoardStore } from '@/stores/boardStore';
 
@@ -15,6 +15,7 @@ const emit = defineEmits(['close']);
 const userStore = useUserStore();
 const boardStore = useBoardStore();
 const newCommentText = ref('');
+const fileInput = ref(null);
 
 const getCommentUser = (userId) => {
   return userStore.users.find(u => u.id === userId) || { name: 'Unknown User' };
@@ -33,11 +34,26 @@ async function addComment() {
 }
 
 async function addAttachment() {
-  if (!props.task) return;
+  fileInput.value.click();
+}
 
-  const fileName = prompt("Enter attachment name:", "document.pdf");
-  if (fileName) {
-    await boardStore.addAttachment(props.task.id, { id: `att-${Date.now()}`, name: fileName, url: '#' });
+async function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !props.task) return;
+
+  // In a real app, you would upload the file to a server.
+  // Here, we'll use a Blob URL for a temporary local link.
+  const fileUrl = URL.createObjectURL(file);
+
+  await boardStore.addAttachment(props.task.id, {
+    id: `att-${Date.now()}`,
+    name: file.name,
+    url: fileUrl,
+    size: file.size,
+  });
+
+  if (event.target) {
+    event.target.value = '';
   }
 }
 </script>
@@ -55,12 +71,18 @@ async function addAttachment() {
       <div class="flex-grow overflow-y-auto space-y-6 pr-2 -mr-2">
         <!-- Attachments Section -->
         <div>
+          <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden" />
           <h3 class="font-semibold mb-2 text-gray-700 dark:text-gray-300">Attachments</h3>
           <div class="space-y-2 mb-2">
-            <a v-for="file in task.attachments" :key="file.id" :href="file.url" target="_blank" class="flex items-center px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-md text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-              <span class="flex-grow truncate">{{ file.name }}</span>
-            </a>
+            <div v-for="file in task.attachments" :key="file.id" class="group flex items-center justify-between px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-md text-sm transition-colors">
+              <a :href="file.url" target="_blank" class="flex items-center min-w-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                <span class="flex-grow truncate" :title="file.name">{{ file.name }}</span>
+              </a>
+              <button @click="boardStore.removeAttachment(task.id, file.id)" class="ml-2 p-1 rounded-full text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
           </div>
           <button type="button" @click="addAttachment" class="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700/50 text-sm rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
             + Add Attachment

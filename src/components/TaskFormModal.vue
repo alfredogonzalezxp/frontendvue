@@ -12,7 +12,7 @@ const props = defineProps({
 
 const userStore = useUserStore();
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save', 'delete']);
 
 const form = ref({
   title: '',
@@ -52,6 +52,10 @@ watch(() => props.task, (newTask) => {
 function save() {
   emit('save', { ...form.value });
   emit('close');
+}
+
+function handleDelete() {
+  emit('delete', props.task);
 }
 
 function addLabel() {
@@ -132,13 +136,20 @@ function removeLabel(labelText) {
         </form>
       </div>
       <!-- Modal Actions -->
-      <div class="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-300 dark:border-gray-600">
+      <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-300 dark:border-gray-600">
+        <div>
+          <button v-if="task" @click="handleDelete" type="button" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+            Delete
+          </button>
+        </div>
+        <div class="flex gap-4">
         <button type="button" @click="$emit('close')" class="px-4 py-2 bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
           Cancel
         </button>
         <button type="submit" form="task-form" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" i18n-text="Aceptar">
           Save
         </button>
+      </div>
       </div>
     </div>
   </div>

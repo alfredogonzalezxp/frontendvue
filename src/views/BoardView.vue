@@ -34,6 +34,17 @@ function handleAddTask({ columnId }) {
   handleEditTask({ task: null, columnId });
 }
 
+async function handleDeleteTask(task) {
+  if (window.confirm(`Are you sure you want to delete the task "${task.title}"?`)) {
+    await boardStore.deleteTask(task.id);
+    // If the deleted task was selected, close the sidebar
+    if (selectedTask.value && selectedTask.value.id === task.id) {
+      selectedTask.value = null;
+    }
+    closeModal();
+  }
+}
+
 function closeModal() {
   showModal.value = false;
   editingTask.value = null;
@@ -65,7 +76,7 @@ async function handleSaveTask(taskData) {
 <template>
   <div class="flex flex-1 overflow-hidden h-full relative">
     <div class="flex-1 p-4 overflow-x-auto h-full">
-      <Board @add-task="handleAddTask" @edit-task="handleEditTask" @select-task="handleSelectTask" />
+      <Board @add-task="handleAddTask" @edit-task="handleEditTask" @select-task="handleSelectTask" @deleteTask="handleDeleteTask" />
     </div>
 
     <!-- Sidebar Backdrop (for mobile/tablet) -->
@@ -76,6 +87,7 @@ async function handleSaveTask(taskData) {
       :task="editingTask"
       @close="closeModal"
       @save="handleSaveTask"
+      @delete="handleDeleteTask"
     />
 
     <Transition name="slide-fade">
