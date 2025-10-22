@@ -22,6 +22,11 @@ function handleLogout() {
         Welcome, <span class="font-semibold">{{ userStore.currentUser.name }}</span> ({{ userStore.currentUser.role }})
       </div>
 
+      <!-- "Manage Users" button for admins -->
+      <router-link v-if="userStore.isAdmin" to="/manage-users" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-4">
+        Manage Users
+      </router-link>
+
       <!-- "Add User" button for admins -->
       <router-link v-if="userStore.isAdmin" to="/create-user" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4">
         Add User

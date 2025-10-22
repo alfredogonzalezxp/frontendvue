@@ -52,7 +52,7 @@ function closeModal() {
 }
 
 async function handleSaveTask(taskData) {
-  const column = boardStore.board.columns.find(c => c.id === editingColumnId.value);
+  let column = boardStore.board.columns.find(c => c.id === editingColumnId.value);
   if (!column) return;
 
   if (taskData.id) { // Editing existing task
@@ -60,14 +60,15 @@ async function handleSaveTask(taskData) {
     if (selectedTask.value && selectedTask.value.id === taskData.id) {
       // The selectedTask is reactive, so it will update automatically.
       // To be safe and ensure reactivity, we can re-assign it.
-      const updatedTask = column.tasks.find(t => t.id === taskData.id);
+      const updatedTask = await boardStore.updateTask(taskData); // Ensure reactivity by getting the updated task from store
       if (updatedTask) selectedTask.value = updatedTask;
     }
   } else {
-    const newTask = await boardStore.addTask(editingColumnId.value, taskData);
-    if (column) {
-      column.tasks.push(newTask);
-    }
+    await boardStore.addTask(editingColumnId.value, taskData);
+    // After adding, re-fetch the board to ensure state is consistent with backend
+    // or, if backend returns the new task with its final ID, push it to the column
+    // For simplicity, let's assume addTask updates the local state directly for now
+    // (as implemented in the diff for boardStore.js)
   }
   closeModal();
 }

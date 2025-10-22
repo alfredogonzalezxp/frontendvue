@@ -1,5 +1,6 @@
 <script setup>
 import TaskCard from './TaskCard.vue';
+import { useBoardStore } from '@/stores/boardStore';
 import { useUserStore } from '@/stores/userStore';
 import { VueDraggableNext } from 'vue-draggable-next';
 
@@ -12,6 +13,7 @@ const props = defineProps({
   },
 });
 
+const boardStore = useBoardStore();
 const emit = defineEmits(['addTask', 'editTask', 'selectTask', 'update:column']);
 
 function handleEditTask(task) {
@@ -21,17 +23,29 @@ function handleEditTask(task) {
 function handleSelectTask(task) {
   emit('selectTask', { task, columnId: props.column.id });
 }
+
+async function onTaskMoved(event) {
+  if (event.added) {
+    // Task added to this column from another
+    const { element: task, newIndex } = event.added;
+    await boardStore.moveTask(task.id, task.columnId, props.column.id, newIndex);
+  } else if (event.moved) {
+    // Task reordered within this column
+    const { element: task, newIndex, oldIndex } = event.moved;
+    await boardStore.moveTask(task.id, props.column.id, props.column.id, newIndex);
+  }
+}
 </script>
 
 <template>
   <div class="w-full md:w-80 bg-gray-200 dark:bg-gray-700 rounded-lg p-3 flex flex-col">
     <h2 class="font-bold mb-3 flex-shrink-0">{{ column.name }}</h2>
     <VueDraggableNext
-      class="flex-grow space-y-3 overflow-y-auto"
+      class="flex-grow space-y-3 overflow-y-auto min-h-[50px]"
       :list="column.tasks"
       group="tasks"
       item-key="id"
-      @change="$emit('update:column', { ...column, tasks: $event.moved ? column.tasks : $event.added ? column.tasks : $event.removed ? column.tasks : [] })"
+      @change="onTaskMoved($event)"
     >
       <TaskCard v-for="task in column.tasks" :key="task.id" :task="task" @click="handleSelectTask(task)" @dblclick.prevent="userStore.isAdmin && handleEditTask(task)" />
     </VueDraggableNext>

@@ -1,10 +1,15 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import Column from './Column.vue';
 import { useBoardStore } from '@/stores/boardStore';
 
 const boardStore = useBoardStore();
 const board = computed(() => boardStore.getBoard);
+
+// Fetch the board data when the component is mounted
+onMounted(() => {
+  boardStore.fetchBoard();
+});
 </script>
 
 <template>
