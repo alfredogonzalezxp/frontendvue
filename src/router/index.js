@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import BoardView from '@/views/BoardView.vue';
 import LoginView from '@/views/LoginView.vue';
-import CreateUserView from '@/views/CreateUserView.vue';
 import NotAuthorizedView from '@/views/NotAuthorizedView.vue';
+import UserManagementView from '@/views/UserManagementView.vue';
+import UserEditView from '@/views/UserEditView.vue';
 import { useUserStore } from '@/stores/userStore';
 
 const routes = [
@@ -18,16 +19,22 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/create-user',
-    name: 'CreateUserView',
-    component: CreateUserView,
-    meta: { requiresAuth: true, requiresAdmin: true },
-  },
-  {
     path: '/not-authorized',
     name: 'NotAuthorizedView',
     component: NotAuthorizedView,
   },
+  {
+    path: '/manage-users',
+    name: 'manage-users',
+    component: UserManagementView,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/edit-user/:id',
+    name: 'edit-user',
+    component: UserEditView,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  }
 ];
 
 const router = createRouter({

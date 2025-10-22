@@ -28,9 +28,9 @@ function handleLogout() {
       </router-link>
 
       <!-- "Add User" button for admins -->
-      <router-link v-if="userStore.isAdmin" to="/create-user" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4">
+      <button v-if="userStore.isAdmin" @click="userStore.showCreateUserModal = true" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-4">
         Add User
-      </router-link>
+      </button>
 
       <!-- Logout Button -->
       <button @click="handleLogout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mr-4">
@@ -39,7 +39,13 @@ function handleLogout() {
     </template>
 
     <div class="relative">
-      <input type="search" placeholder="Search..." class="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input
+        v-if="userStore.isAuthenticated"
+        type="search"
+        placeholder="Search users..."
+        v-model="userStore.searchQuery"
+        class="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
     </div>
   </header>
 </template>

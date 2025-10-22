@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import Board from '@/components/Board.vue';
 import TaskFormModal from '@/components/TaskFormModal.vue';
+import UserCreateModal from '@/components/UserCreateModal.vue';
 import TaskDetailsSidebar from '@/components/TaskDetailsSidebar.vue';
 import { useBoardStore } from '@/stores/boardStore';
 import { useUserStore } from '@/stores/userStore';
@@ -89,6 +90,11 @@ async function handleSaveTask(taskData) {
       @close="closeModal"
       @save="handleSaveTask"
       @delete="handleDeleteTask"
+    />
+
+    <UserCreateModal
+      :show="userStore.showCreateUserModal"
+      @close="userStore.showCreateUserModal = false"
     />
 
     <Transition name="slide-fade">

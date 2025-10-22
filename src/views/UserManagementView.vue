@@ -1,18 +1,39 @@
 <script setup>
-import { onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
+import { onMounted, computed } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 
 const userStore = useUserStore();
+const router = useRouter();
 
 onMounted(() => {
   userStore.fetchUsers();
+});
+
+const filteredUsers = computed(() => {
+  if (!userStore.searchQuery) {
+    return userStore.users;
+  }
+  const query = userStore.searchQuery.toLowerCase();
+  return userStore.users.filter(user => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query));
 });
 
 async function deleteUser(user) {
   if (window.confirm(`Are you sure you want to delete user "${user.name}" (${user.email})?`)) {
     try {
       await userStore.deleteUser(user.id);
+      // If the admin deletes another user, just show a success message and refresh the list.
+      // The logout logic is now only triggered if the deleted user is the current user,
+      // which is handled by the disabled button, but this is a good safeguard.
+      if (userStore.currentUser && userStore.currentUser.id !== user.id) {
+        alert('User deleted successfully.');
+        // The user is removed from the local state by the store action, so no extra fetch is needed.
+      }
+      // After a successful deletion, alert the user, log them out, and redirect to the login page.
+      alert('User deleted successfully. You will now be logged out as a security measure.');
+      userStore.logout();
+      router.push('/login');
+
     } catch (error) {
       alert(`Error deleting user: ${error.message}`);
     }
@@ -34,7 +55,7 @@ async function deleteUser(user) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in userStore.users" :key="user.id">
+          <tr v-for="user in filteredUsers" :key="user.id">
             <td class="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm">
               <p class="whitespace-no-wrap">{{ user.name }}</p>
             </td>

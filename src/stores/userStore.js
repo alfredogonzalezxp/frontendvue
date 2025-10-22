@@ -49,6 +49,7 @@ export const useUserStore = defineStore('user', {
     })(),
     token: localStorage.getItem('token') || null,
     searchQuery: '',
+    showCreateUserModal: false,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
@@ -186,7 +187,20 @@ export const useUserStore = defineStore('user', {
      * @param {string} userId
      */
     async deleteUser(userId) {
-      await fetch(`${API_URL}/users/${userId}`, { method: 'DELETE', headers: createAuthHeaders() });
+      const response = await fetch(`${API_URL}/users/${userId}`, { method: 'DELETE', headers: createAuthHeaders() });
+      alert(API_URL);
+      if (!response.ok) {
+        const errorText = await response.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          // Use the specific message from the backend
+          throw new Error(errorData.message || `Failed to delete user: ${response.statusText}`);
+        } catch (e) {
+          // Fallback if the response is not JSON or is empty
+          throw new Error(errorText || `Failed to delete user: ${response.statusText}`);
+        }
+      }
+      // Only update the local state if the API call was successful
       this.users = this.users.filter(u => u.id !== userId);
     }
   },
